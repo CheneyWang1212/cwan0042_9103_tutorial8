@@ -4,9 +4,8 @@ function preload() {
   song = loadSound("assets/bgm.mp3");
 }
 
-//Added the isExploding property to mark whether the bubble is exploding. In the move method, added a check for isExploding to ensure the bubble does not move while exploding. In the display method, added a check for isExploding to ensure the bubble is not rendered while exploding. Added the explode method to mark the bubble as exploding and generate particle effects.
-
 class MovingBubble {
+  //The constructor initializes various properties of the bubble, including position, size, color, speed, and text content.
   constructor(text, col1, col2) {
     this.x = random(width);
     this.y = random(height);
@@ -23,6 +22,7 @@ class MovingBubble {
     this.isExploding = false;
   }
 
+  //Controls the slow movement of the bubble on the screen and ensures it stays within the screen boundaries. If the bubble is hovered over by the mouse, a breathing effect is triggered.
   move() {
     if (!this.isHovered && !this.isExploding) {
       this.x += this.speedX;
@@ -35,6 +35,7 @@ class MovingBubble {
     }
   }
 
+  //Renders the bubble's graphics, including gradient effects and the text in the center.
   display() {
     if (this.isExploding) return; // Skip rendering if exploding
 
@@ -60,6 +61,7 @@ class MovingBubble {
     text(this.text, this.x, this.y);
   }
 
+  //The method for the bubble explosion, used to mark the bubble as exploding and generate particle effects.
   explode() {
     this.isExploding = true;
     for (let i = 0; i < 100; i++) {
@@ -68,8 +70,7 @@ class MovingBubble {
   }
 }
 
-//Added parameters x, y, and col to the constructor to initialize the particle's starting position and color. In the move method, added a decrement to the alpha property to simulate the particle's fading effect.
-
+//The constructor initializes the properties of the particle, including position, size, speed, and transparency.
 class Particle {
   constructor(x, y, col) {
     this.x = x;
@@ -81,12 +82,13 @@ class Particle {
     this.col = col;
   }
 
+  //Controls the movement of the particle on the screen and ensures that the particle stays within the screen boundaries.
   move() {
     this.x += this.speedX;
     this.y += this.speedY;
     this.alpha -= 5;
   }
-
+//Render the particle as a small white dot with transparency.
   display() {
     if (this.alpha <= 0) return;
     noStroke();
@@ -94,8 +96,7 @@ class Particle {
     ellipse(this.x, this.y, this.size);
   }
 }
-
-
+//Declared some global variables to control noise, phase, scale value, scale direction, foam offset, the array of moving bubbles, and the array of particles.
 let noiseMax = 1;
 let phase = 0;
 let scaleValue = 1;
@@ -117,8 +118,17 @@ function setup() {
   let button = createButton('Play/Stop');
   button.position((width - button.width) / 2, height - button.height - 2);
   button.mousePressed(play_pause);
+
+  // Added an event listener to detect when the spacebar is pressed. When the spacebar is pressed, the play_pause function is called to toggle the music playback state.
+
+  document.addEventListener('keydown', function(event) {
+    if (event.code === 'Space') {
+      play_pause();
+    }
+  });
 }
 
+//Responsible for drawing the content of each frame, including the gradient background color, background wave effect, and the display of moving bubbles and particles.
 function draw() {
   let topColor = color(153, 186, 221);
   let bottomColor = color(102, 153, 204);
@@ -153,8 +163,6 @@ function draw() {
     particle.display();
   }
 
-//Added the global variables displayMessage, displayMessageColor, displayMessageAlpha, and isMessageDisplayed to control the display of messages. 
-
   if (displayMessage) {
     fill(displayMessageColor);
     textSize(getAdaptiveTextSize(displayMessage));
@@ -165,8 +173,7 @@ function draw() {
   }
 }
 
-//Added the mousePressed function to handle mouse click events. When a bubble is clicked, it explodes and displays the corresponding healing message. 
-
+//Handles mouse click events. When a bubble is clicked, it explodes and displays the corresponding healing message.
 function mousePressed() {
   if (isMessageDisplayed) {
     isMessageDisplayed = false;
@@ -177,7 +184,10 @@ function mousePressed() {
       if (dist(mouseX, mouseY, bubble.x, bubble.y) < bubble.size / 2) {
         bubble.explode();
         displayMessage = getHealingMessage(bubble.text);
-        displayMessageColor = color(red(bubble.col1) * 1.2, green(bubble.col1) * 1.2, blue(bubble.col1) * 1.2);
+
+        //Changed the color of text
+        let outerColor = lerpColor(bubble.col1, bubble.col2,1)
+        displayMessageColor = color(red(outerColor) * 1.2, green(outerColor) * 1.2, blue(outerColor) * 1.2);
         displayMessageAlpha = 0;
         movingBubbles = [];
         isMessageDisplayed = true;
@@ -187,8 +197,7 @@ function mousePressed() {
   }
 }
 
-//Added the initializeBubbles function to initialize all bubbles.
-
+//Initializes all the bubbles.
 function initializeBubbles() {
   movingBubbles = [];
   movingBubbles.push(new MovingBubble("sad", color(0, 0, 139, 150), color(221, 160, 221, 150)));
@@ -202,8 +211,7 @@ function initializeBubbles() {
   movingBubbles.push(new MovingBubble("angry", color(16, 12, 8, 150), color(194, 0, 0, 150)));
 }
 
-//Added the getHealingMessage function to return the corresponding healing message based on the text content of the bubble.
-
+//Returns the corresponding healing message based on the text content of the bubble.
 function getHealingMessage(text) {
   switch (text) {
     case "sad":
@@ -229,6 +237,7 @@ function getHealingMessage(text) {
   }
 }
 
+//A function that controls the music playback and pause. This function is called to toggle the music's playback state when the button is pressed or the spacebar is pressed.
 function play_pause() {
   if (song.isPlaying()) {
     song.stop();
@@ -237,12 +246,16 @@ function play_pause() {
   }
 }
 
+
+//Adjusts the canvas size when the window size changes.
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
 }
 
+
+//Dynamically adjusts the text size based on the text length.
 function getAdaptiveTextSize(text) {
   let len = text.length;
-  let baseSize = min(width, height) / 10;
+  let baseSize = min(width, height) / 6;
   return baseSize / (len / 10);
 }
