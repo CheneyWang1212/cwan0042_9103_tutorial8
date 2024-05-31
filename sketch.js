@@ -249,7 +249,7 @@ function play_pause() {
 
 //Adjusts the canvas size when the window size changes.
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  resizeCanvas(windowWidth, windowHeight); 
 }
 
 
